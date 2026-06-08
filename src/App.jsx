@@ -436,7 +436,7 @@ function WorkoutTab({ exercises: initExercises }) {
           <div style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }} onClick={() => setExpanded(expanded===ex.id?null:ex.id)}>
             <span style={{ fontSize:26 }}>{ex.emoji}</span>
             <div style={{ flex:1 }}>
-              <div style={{ fontWeight:700, fontSize:14, fontFamily:"Georgia,serif", color:"#1a1a2e" }}>{ex.en} <span style={{ color:"#bbb", fontWeight:400, fontSize:12 }}>{ex.zh}</span></div>
+              <div style={{ fontWeight:800, fontSize:15, fontFamily:"sans-serif", color:"#1a1a2e" }}>{ex.zh} <span style={{ color:"#FD9033", fontWeight:600, fontSize:12, fontFamily:"Georgia,serif" }}>{ex.en}</span></div>
               <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif" }}>{ex.muscle_zh}</div>
             </div>
             <div style={{ textAlign:"right" }}>
@@ -517,8 +517,9 @@ function WorkoutTab({ exercises: initExercises }) {
       <div style={{ fontSize:88, fontWeight:900, fontFamily:"Georgia,serif", color: timer <= 10 ? "#e53935" : "#1a1a2e", transition:"color 0.5s", lineHeight:1 }}>{timer}</div>
       <div style={{ fontSize:14, color:"#aaa", fontFamily:"sans-serif", marginBottom:20 }}>seconds · 秒</div>
       <div style={{ background:"#f8f8fc", borderRadius:14, padding:"14px", marginBottom:16 }}>
-        <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>Next up · 下一个</div>
-        <div style={{ fontSize:16, fontWeight:700, color:"#1a1a2e", fontFamily:"Georgia,serif", marginTop:4 }}>{exerciseList[exIdx]?.en} — Set {setIdx+1}/{getSets(exerciseList[exIdx])}</div>
+        <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>下一个动作 · Next up</div>
+        <div style={{ fontSize:18, fontWeight:800, color:"#1a1a2e", fontFamily:"sans-serif", marginTop:4 }}>{exerciseList[exIdx]?.zh}</div>
+        <div style={{ fontSize:12, color:"#FD9033", fontFamily:"Georgia,serif" }}>{exerciseList[exIdx]?.en} · 第 {setIdx+1}/{getSets(exerciseList[exIdx])} 组</div>
       </div>
       <button onClick={skipRest} style={{ ...S.btn("#f0f0f7","#555") }}>Skip Rest · 跳过休息</button>
     </div>
@@ -556,7 +557,8 @@ function WorkoutTab({ exercises: initExercises }) {
             <div style={{ height:170, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
               <div style={{ fontSize:48 }}>{ex.emoji}</div>
               <div style={{ fontSize:16, fontWeight:800, color:"#fff", fontFamily:"sans-serif" }}>{ex.zh}</div>
-              <div style={{ fontSize:10, color:"#F4A84A", fontFamily:"sans-serif" }}>示范视频即将上线 · Coming Soon</div>
+              <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
+              <div style={{ fontSize:10, color:"#F4A84A", fontFamily:"sans-serif", marginTop:2 }}>示范视频即将上线 · Coming Soon</div>
             </div>
           )}
         </div>
