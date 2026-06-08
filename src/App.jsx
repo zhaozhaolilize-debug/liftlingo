@@ -5,7 +5,7 @@ const EXERCISE_DB = {
   pull: [
     { id:"p1", emoji:"🏋️", en:"Deadlift", zh:"硬拉", muscle_en:"Back / Hamstrings", muscle_zh:"背部 / 腿后", sets:4, reps:8, rest:90, douyinUrl:"https://www.douyin.com",
       tip_en:"Hinge at your hips, keep the bar close to your legs, chest proud.", tip_zh:"髋部铰链发力，杠铃贴腿，挺胸。",
-      videoUrl:"",
+      videoUrl:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       cues:["Stand tall","Hip hinge back","Drive through heels","Lock out at top"],
       alts:A([{en:"Dumbbell Deadlift",zh:"哑铃硬拉",why_en:"No barbell needed",why_zh:"无杠铃可用"},{en:"Good Morning",zh:"早安式体前屈",why_en:"Beginner hip hinge",why_zh:"初学者版髋铰动作"},{en:"Kettlebell Swing",zh:"壶铃摆动",why_en:"Teaches explosive hip drive",why_zh:"训练爆发性髋部发力"}]) },
     { id:"p2", emoji:"🔄", en:"Bent-over Row", zh:"俯身划船", muscle_en:"Upper Back / Lats", muscle_zh:"上背 / 背阔肌", sets:3, reps:12, rest:60, douyinUrl:"https://www.douyin.com",
