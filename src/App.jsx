@@ -5,7 +5,7 @@ const EXERCISE_DB = {
   pull: [
     { id:"p1", emoji:"🏋️", en:"Deadlift", zh:"硬拉", muscle_en:"Back / Hamstrings", muscle_zh:"背部 / 腿后", sets:4, reps:8, rest:90, douyinUrl:"https://www.douyin.com",
       tip_en:"Hinge at your hips, keep the bar close to your legs, chest proud.", tip_zh:"髋部铰链发力，杠铃贴腿，挺胸。",
-      videoUrl:"https://www.w3schools.com/html/mov_bbb.mp4",
+      videoUrl:"",
       cues:["Stand tall","Hip hinge back","Drive through heels","Lock out at top"],
       alts:A([{en:"Dumbbell Deadlift",zh:"哑铃硬拉",why_en:"No barbell needed",why_zh:"无杠铃可用"},{en:"Good Morning",zh:"早安式体前屈",why_en:"Beginner hip hinge",why_zh:"初学者版髋铰动作"},{en:"Kettlebell Swing",zh:"壶铃摆动",why_en:"Teaches explosive hip drive",why_zh:"训练爆发性髋部发力"}]) },
     { id:"p2", emoji:"🔄", en:"Bent-over Row", zh:"俯身划船", muscle_en:"Upper Back / Lats", muscle_zh:"上背 / 背阔肌", sets:3, reps:12, rest:60, douyinUrl:"https://www.douyin.com",
@@ -25,7 +25,7 @@ const EXERCISE_DB = {
       alts:A([{en:"Single-leg RDL",zh:"单腿罗马尼亚硬拉",why_en:"Improves balance",why_zh:"改善单侧平衡"},{en:"Good Morning",zh:"早安式体前屈",why_en:"No weights needed",why_zh:"无需器械"},{en:"Nordic Curl (assisted)",zh:"辅助北欧腘绳弯举",why_en:"Intense hamstring focus",why_zh:"强化腿后链"}]) },
     { id:"p5", emoji:"🧲", en:"Lat Pulldown", zh:"高位下拉", muscle_en:"Lats / Upper Back", muscle_zh:"背阔肌 / 上背", sets:3, reps:12, rest:60, douyinUrl:"https://www.douyin.com",
       tip_en:"Lean slightly back, pull bar to upper chest, control the return.", tip_zh:"身体微微后仰，拉至胸上部，控制还原。",
-      videoUrl:"",
+      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/lat-pulldown.mp4",
       cues:["Lean back slightly","Pull to your chest","Elbows drive down","Slow return"],
       alts:A([{en:"Pull-Up (assisted)",zh:"辅助引体向上",why_en:"No machine needed",why_zh:"无器械可替代"},{en:"Band Pulldown",zh:"弹力带下拉",why_en:"Home-friendly",why_zh:"居家练背阔肌"},{en:"Straight-arm Pulldown",zh:"直臂下压",why_en:"Great lat isolation",why_zh:"更好孤立背阔肌"}]) },
   ],
