@@ -463,12 +463,12 @@ function WorkoutTab({ exercises: initExercises }) {
                 <span style={{ color:"#aaa" }}>✅ {ex.tip_zh}</span>
               </div>
 
-              {/* Inline Video Player */}
-              <div style={{ borderRadius:12, overflow:"hidden", background:"#1a1a2e", marginBottom:10 }}>
+              {/* Inline Video Player - 竖向 9:16 */}
+              <div style={{ borderRadius:12, overflow:"hidden", background:"#1a1a2e", marginBottom:10, aspectRatio:"9/16", maxHeight:400, position:"relative" }}>
                 {ex.videoUrl ? (
-                  <video src={ex.videoUrl} controls playsInline style={{ width:"100%", display:"block", maxHeight:200, objectFit:"cover" }} />
+                  <video src={ex.videoUrl} controls playsInline style={{ width:"100%", height:"100%", display:"block", objectFit:"cover" }} />
                 ) : (
-                  <div style={{ height:120, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:6 }}>
+                  <div style={{ height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:6 }}>
                     <div style={{ fontSize:34 }}>{ex.emoji}</div>
                     <div style={{ fontSize:14, fontWeight:800, color:"#fff", fontFamily:"sans-serif" }}>{ex.zh}</div>
                     <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
@@ -550,12 +550,12 @@ function WorkoutTab({ exercises: initExercises }) {
           </button>
         )}
 
-        {/* ① 视频 — 最顶部 */}
-        <div style={{ background:"#1a1a2e", width:"100%" }}>
+        {/* ① 视频 — 最顶部，竖向 9:16 */}
+        <div style={{ background:"#1a1a2e", width:"100%", aspectRatio:"9/16", maxHeight:380, overflow:"hidden" }}>
           {ex.videoUrl ? (
-            <video src={ex.videoUrl} controls playsInline style={{ width:"100%", display:"block", maxHeight:210, objectFit:"cover" }} />
+            <video src={ex.videoUrl} controls playsInline style={{ width:"100%", height:"100%", display:"block", objectFit:"cover" }} />
           ) : (
-            <div style={{ height:170, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
+            <div style={{ height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
               <div style={{ fontSize:48 }}>{ex.emoji}</div>
               <div style={{ fontSize:16, fontWeight:800, color:"#fff", fontFamily:"sans-serif" }}>{ex.zh}</div>
               <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
