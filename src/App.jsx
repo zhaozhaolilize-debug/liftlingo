@@ -470,7 +470,8 @@ function WorkoutTab({ exercises: initExercises }) {
                 ) : (
                   <div style={{ height:120, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:6 }}>
                     <div style={{ fontSize:34 }}>{ex.emoji}</div>
-                    <div style={{ fontSize:13, fontWeight:700, color:"#fff", fontFamily:"Georgia,serif" }}>{ex.en}</div>
+                    <div style={{ fontSize:14, fontWeight:800, color:"#fff", fontFamily:"sans-serif" }}>{ex.zh}</div>
+                    <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
                     <div style={{ fontSize:10, color:"#F4A84A", fontFamily:"sans-serif", letterSpacing:0.8 }}>示范视频即将上线 · Coming Soon</div>
                   </div>
                 )}
