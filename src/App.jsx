@@ -30,10 +30,15 @@ const EXERCISE_DB = {
       alts:A([{en:"Pull-Up (assisted)",zh:"辅助引体向上",why_en:"No machine needed",why_zh:"无器械可替代"},{en:"Band Pulldown",zh:"弹力带下拉",why_en:"Home-friendly",why_zh:"居家练背阔肌"},{en:"Straight-arm Pulldown",zh:"直臂下压",why_en:"Great lat isolation",why_zh:"更好孤立背阔肌"}]) },
   ],
   push: [
-    { id:"q1", emoji:"🏋️", en:"Seated DB Shoulder Press", zh:"坐姿哑铃推肩", muscle_en:"Shoulders / Triceps", muscle_zh:"肩部 / 三头肌", sets:4, reps:10, rest:75, douyinUrl:"https://www.douyin.com",
+    { id:"q1", emoji:"🏋️", en:"Seated Dumbbell Shoulder Press", zh:"坐姿哑铃推肩", muscle_en:"Shoulders / Triceps", muscle_zh:"肩部 / 三头肌", sets:4, reps:10, rest:75, douyinUrl:"https://www.douyin.com",
       tip_en:"Sit upright, press dumbbells from shoulder height straight overhead, control the return.", tip_zh:"坐直，从肩高位置将哑铃垂直上推，控制还原。",
-      videoUrl:"",
-      cues:["Sit tall, core tight","Start at shoulder height","Press straight up","Lower slow & controlled"],
+      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/seated-dumbbell-shoulder-press.mp4",
+      cues:[
+        "Grip dumbbells in the most stable & comfortable position · 用最稳定舒适的方式握住哑铃",
+        "Back against bench, avoid over-arching lower back · 背部贴靠椅背，避免腰部过度拱起",
+        "Wrists neutral, stacked over forearms · 手腕中立，垂直对齐前臂",
+        "Elbows slightly in front, not flared out · 肘部略向前，不要向两侧大幅外展",
+      ],
       alts:A([{en:"Bench Press",zh:"卧推",why_en:"Classic chest & shoulder compound",why_zh:"经典胸肩复合动作"},{en:"Pike Push-Up",zh:"倒V字俯卧撑",why_en:"No equipment needed",why_zh:"无需器械"},{en:"Arnold Press",zh:"阿诺德推举",why_en:"Greater shoulder activation",why_zh:"激活更多肩部肌群"}]) },
     { id:"q2", emoji:"🔺", en:"Overhead Press", zh:"过头推举", muscle_en:"Shoulders / Triceps", muscle_zh:"肩部 / 三头肌", sets:3, reps:10, rest:75, douyinUrl:"https://www.douyin.com",
       tip_en:"Press straight overhead, brace your core, lock out at the top.", tip_zh:"垂直上推，核心收紧，顶端锁定。",
