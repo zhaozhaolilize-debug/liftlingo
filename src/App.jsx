@@ -1,33 +1,39 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
+// ── 全局字体 ──────────────────────────────────────────────────────────────
+// 中文：阿里巴巴普惠体（@font-face 声明在组件内注入，font-display:swap 自动回退）
+// 英文：Helvetica
+const FONT_ZH = "'Alibaba PuHuiTi', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+const FONT_EN = "Helvetica, 'Helvetica Neue', Arial, sans-serif";
+
 const A = (arr) => arr; // alias to keep lines short
 const EXERCISE_DB = {
   pull: [
-    { id:"p1", emoji:"🏋️", en:"Deadlift", zh:"硬拉", muscle_en:"Back / Hamstrings", muscle_zh:"背部 / 腿后", sets:4, reps:8, rest:90, douyinUrl:"https://www.douyin.com",
-      tip_en:"Hinge at your hips, keep the bar close to your legs, chest proud.", tip_zh:"髋部铰链发力，杠铃贴腿，挺胸。",
-      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/deadlift.mp4",
-      cues:["Stand tall","Hip hinge back","Drive through heels","Lock out at top"],
-      alts:A([{en:"Dumbbell Deadlift",zh:"哑铃硬拉",why_en:"No barbell needed",why_zh:"无杠铃可用"},{en:"Good Morning",zh:"早安式体前屈",why_en:"Beginner hip hinge",why_zh:"初学者版髋铰动作"},{en:"Kettlebell Swing",zh:"壶铃摆动",why_en:"Teaches explosive hip drive",why_zh:"训练爆发性髋部发力"}]) },
-    { id:"p2", emoji:"🔄", en:"Bent-over Row", zh:"俯身划船", muscle_en:"Upper Back / Lats", muscle_zh:"上背 / 背阔肌", sets:3, reps:12, rest:60, douyinUrl:"https://www.douyin.com",
-      tip_en:"Hinge 45°, pull elbows past your torso, squeeze shoulder blades.", tip_zh:"上身前倾45度，肘部拉过躯干，夹紧肩胛骨。",
-      videoUrl:"",
-      cues:["Hinge forward","Pull to belly","Squeeze your back","Lower it slow"],
+    { id:"p2", emoji:"🚣", en:"Seated Cable Row", zh:"坐姿划船", muscle_en:"Upper Back / Lats", muscle_zh:"上背 / 背阔肌", sets:3, reps:12, rest:60, douyinUrl:"https://www.douyin.com",
+      tip_en:"Hinge slightly back, pull handle to your stomach, squeeze shoulder blades together.", tip_zh:"上身微微后倾，将把柄拉向腹部，夹紧肩胛骨。",
+      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/seated-cable-row.mp4",
+      cues:["Sit tall, chest up","Pull elbows back, not up","Squeeze shoulder blades at the end","Control the return"],
       alts:A([{en:"Dumbbell Row",zh:"哑铃单臂划船",why_en:"Single arm, easier balance",why_zh:"单臂操作更易平衡"},{en:"Resistance Band Row",zh:"弹力带划船",why_en:"No gym equipment needed",why_zh:"居家即可完成"},{en:"Inverted Row",zh:"澳式引体",why_en:"Bodyweight, great for beginners",why_zh:"自重训练新手友好"}]) },
+    { id:"p6", emoji:"🧗", en:"Assisted Pull-Up", zh:"助力引体向上", muscle_en:"Lats / Biceps", muscle_zh:"背阔肌 / 二头肌", sets:3, reps:8, rest:75, douyinUrl:"https://www.douyin.com",
+      tip_en:"Use the assist machine for support, pull your chin over the bar, lower with control.", tip_zh:"借助辅助器械支撑，下巴拉过横杠，缓慢下放控制还原。",
+      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/assisted-pull-up.mp4",
+      cues:["Full hang to start","Pull chin over the bar","Squeeze shoulder blades","Lower with control"],
+      alts:A([{en:"Band-Assisted Pull-Up",zh:"弹力带辅助引体向上",why_en:"No machine needed",why_zh:"无需辅助器械"},{en:"Negative Pull-Up",zh:"离心引体向上",why_en:"Builds strength for full reps",why_zh:"为完整引体打基础"},{en:"Inverted Row",zh:"澳式引体",why_en:"Bodyweight, beginner friendly",why_zh:"自重训练新手友好"}]) },
     { id:"p3", emoji:"💪", en:"Bicep Curl", zh:"弯举", muscle_en:"Biceps", muscle_zh:"二头肌", sets:3, reps:15, rest:45, douyinUrl:"https://www.douyin.com",
       tip_en:"Keep elbows pinned at your sides, full range of motion.", tip_zh:"肘部固定于体侧，完整活动范围。",
       videoUrl:"",
       cues:["Pin your elbows","Squeeze at the top","Lower 3 seconds","No swinging!"],
       alts:A([{en:"Hammer Curl",zh:"锤式弯举",why_en:"Easier on the wrists",why_zh:"对手腕更友好"},{en:"Band Curl",zh:"弹力带弯举",why_en:"No dumbbells needed",why_zh:"无哑铃可用"},{en:"Chin-Up (assisted)",zh:"辅助引体向上",why_en:"Compound bicep builder",why_zh:"复合动作练二头"}]) },
-    { id:"p4", emoji:"🦵", en:"Romanian Deadlift", zh:"罗马尼亚硬拉", muscle_en:"Glutes / Hamstrings", muscle_zh:"臀部 / 腿后", sets:3, reps:10, rest:75, douyinUrl:"https://www.douyin.com",
-      tip_en:"Push hips back, soft bend in knees, feel the hamstring stretch.", tip_zh:"髋部向后推，膝盖微弯，感受腿后拉伸。",
-      videoUrl:"",
-      cues:["Push hips back","Soft knee bend","Feel the stretch","Drive hips forward"],
-      alts:A([{en:"Single-leg RDL",zh:"单腿罗马尼亚硬拉",why_en:"Improves balance",why_zh:"改善单侧平衡"},{en:"Good Morning",zh:"早安式体前屈",why_en:"No weights needed",why_zh:"无需器械"},{en:"Nordic Curl (assisted)",zh:"辅助北欧腘绳弯举",why_en:"Intense hamstring focus",why_zh:"强化腿后链"}]) },
     { id:"p5", emoji:"🧲", en:"Lat Pulldown", zh:"高位下拉", muscle_en:"Lats / Upper Back", muscle_zh:"背阔肌 / 上背", sets:3, reps:12, rest:60, douyinUrl:"https://www.douyin.com",
       tip_en:"Lean slightly back, pull bar to upper chest, control the return.", tip_zh:"身体微微后仰，拉至胸上部，控制还原。",
       videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/lat-pulldown.mp4",
       cues:["Lean back slightly","Pull to your chest","Elbows drive down","Slow return"],
       alts:A([{en:"Pull-Up (assisted)",zh:"辅助引体向上",why_en:"No machine needed",why_zh:"无器械可替代"},{en:"Band Pulldown",zh:"弹力带下拉",why_en:"Home-friendly",why_zh:"居家练背阔肌"},{en:"Straight-arm Pulldown",zh:"直臂下压",why_en:"Great lat isolation",why_zh:"更好孤立背阔肌"}]) },
+    { id:"p7", emoji:"🪢", en:"Face Pull", zh:"面拉", muscle_en:"Rear Delts / Upper Back", muscle_zh:"三角肌后束 / 上背", sets:3, reps:15, rest:45, douyinUrl:"https://www.douyin.com",
+      tip_en:"Pull the rope to your face, elbows high, squeeze your shoulder blades at the end.", tip_zh:"将绳索拉向脸部，肘部抬高，末端夹紧肩胛骨。",
+      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/face-pull.mp4",
+      cues:["Elbows high","Pull to eye level","Squeeze shoulder blades","Control the return"],
+      alts:A([{en:"Band Face Pull",zh:"弹力带面拉",why_en:"No cable machine needed",why_zh:"无需绳索器械"},{en:"Reverse Fly",zh:"反向飞鸟",why_en:"Targets the same rear delts",why_zh:"同样针对三角肌后束"},{en:"Prone Y Raise",zh:"俯卧Y字举",why_en:"Bodyweight shoulder activation",why_zh:"自重激活肩部"}]) },
   ],
   push: [
     { id:"q1", emoji:"🏋️", en:"Seated Dumbbell Shoulder Press", zh:"坐姿哑铃推肩", muscle_en:"Shoulders / Triceps", muscle_zh:"肩部 / 三头肌", sets:4, reps:10, rest:75, douyinUrl:"https://www.douyin.com",
@@ -67,6 +73,16 @@ const EXERCISE_DB = {
       videoUrl:"",
       cues:["Chest tall","Push knees out","Break parallel","Drive through heels"],
       alts:A([{en:"Goblet Squat",zh:"酒杯式深蹲",why_en:"Easier to stay upright",why_zh:"更容易保持挺胸"},{en:"Box Squat",zh:"箱式深蹲",why_en:"Safe way to learn depth",why_zh:"安全掌握下蹲深度"},{en:"Wall Sit",zh:"靠墙静蹲",why_en:"No weights needed",why_zh:"无需任何器械"}]) },
+    { id:"l4", emoji:"🏋️", en:"Deadlift", zh:"硬拉", muscle_en:"Back / Hamstrings", muscle_zh:"背部 / 腿后", sets:4, reps:8, rest:90, douyinUrl:"https://www.douyin.com",
+      tip_en:"Hinge at your hips, keep the bar close to your legs, chest proud.", tip_zh:"髋部铰链发力，杠铃贴腿，挺胸。",
+      videoUrl:"https://pub-66529fa0bd4b4e108464d6eb794b087d.r2.dev/deadlift.mp4",
+      cues:["Stand tall","Hip hinge back","Drive through heels","Lock out at top"],
+      alts:A([{en:"Dumbbell Deadlift",zh:"哑铃硬拉",why_en:"No barbell needed",why_zh:"无杠铃可用"},{en:"Good Morning",zh:"早安式体前屈",why_en:"Beginner hip hinge",why_zh:"初学者版髋铰动作"},{en:"Kettlebell Swing",zh:"壶铃摆动",why_en:"Teaches explosive hip drive",why_zh:"训练爆发性髋部发力"}]) },
+    { id:"l5", emoji:"🔻", en:"Romanian Deadlift", zh:"罗马尼亚硬拉", muscle_en:"Glutes / Hamstrings", muscle_zh:"臀部 / 腿后", sets:3, reps:10, rest:75, douyinUrl:"https://www.douyin.com",
+      tip_en:"Push hips back, soft bend in knees, feel the hamstring stretch.", tip_zh:"髋部向后推，膝盖微弯，感受腿后拉伸。",
+      videoUrl:"",
+      cues:["Push hips back","Soft knee bend","Feel the stretch","Drive hips forward"],
+      alts:A([{en:"Single-leg RDL",zh:"单腿罗马尼亚硬拉",why_en:"Improves balance",why_zh:"改善单侧平衡"},{en:"Good Morning",zh:"早安式体前屈",why_en:"No weights needed",why_zh:"无需器械"},{en:"Nordic Curl (assisted)",zh:"辅助北欧腘绳弯举",why_en:"Intense hamstring focus",why_zh:"强化腿后链"}]) },
     { id:"l2", emoji:"🦵", en:"Lunge", zh:"弓步蹲", muscle_en:"Glutes / Quads", muscle_zh:"臀部 / 股四头肌", sets:3, reps:10, rest:60, douyinUrl:"https://www.douyin.com",
       tip_en:"Step forward, back knee hovers 1 inch off floor, torso upright.", tip_zh:"向前迈步，后膝悬于地面上方约2cm，上身直立。",
       videoUrl:"",
@@ -180,8 +196,33 @@ const TABS = [
 
 const S = {
   card: { background:"#fff", borderRadius:20, padding:"16px 18px", boxShadow:"0 2px 16px rgba(0,0,0,0.06)", border:"1.5px solid #f0f0f0", marginBottom:12 },
-  btn: (bg, color, full) => ({ background:bg, color, border:"none", borderRadius:14, padding:full?"14px":"10px 18px", cursor:"pointer", fontWeight:700, fontSize:14, fontFamily:"sans-serif", width:full?"100%":"auto" }),
+  btn: (bg, color, full) => ({ background:bg, color, border:"none", borderRadius:14, padding:full?"14px":"10px 18px", cursor:"pointer", fontWeight:700, fontSize:14, fontFamily:FONT_ZH, width:full?"100%":"auto" }),
 };
+
+// ── 3D EMOJI BADGE ───────────────────────────────────────────────────────────
+// 马卡龙渐变色板，按动作id首字母分类（p拉力/q推力/l腿/c核心/f全身/v有氧）
+const BADGE_COLORS = {
+  p: ["#EAF2FF","#A9C9F5"], // pull   - 马卡龙蓝
+  q: ["#FFEDE2","#FFC2A1"], // push   - 马卡龙橙
+  l: ["#E7F7E3","#AEE3AE"], // legs   - 马卡龙绿
+  c: ["#F1ECFF","#CBBDF7"], // core   - 马卡龙紫
+  f: ["#FFF8DC","#FFE08F"], // full   - 马卡龙黄
+  v: ["#FFE6EF","#FFB6CE"], // cardio - 马卡龙粉
+};
+function EmojiBadge({ emoji, id, size=40 }) {
+  const [light, base] = BADGE_COLORS[id?.[0]] || ["#F2F2F7","#D6D6E4"];
+  return (
+    <div style={{
+      width:size, height:size, minWidth:size, borderRadius:"50%", flexShrink:0,
+      background:`radial-gradient(circle at 32% 28%, ${light} 0%, ${base} 75%)`,
+      display:"flex", alignItems:"center", justifyContent:"center",
+      fontSize: Math.round(size*0.55),
+      boxShadow:"inset -2px -3px 5px rgba(255,255,255,0.7), inset 2px 4px 7px rgba(0,0,0,0.13), 0 3px 8px rgba(0,0,0,0.10)",
+    }}>
+      <span style={{ filter:"drop-shadow(0 1px 2px rgba(0,0,0,0.18))", lineHeight:1 }}>{emoji}</span>
+    </div>
+  );
+}
 
 // ── SWAP MODAL ────────────────────────────────────────────────────────────────
 function SwapModal({ exercise, onSelect, onClose }) {
@@ -189,19 +230,19 @@ function SwapModal({ exercise, onSelect, onClose }) {
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.55)", zIndex:9999, display:"flex", alignItems:"flex-end", justifyContent:"center" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background:"#fff", borderRadius:"24px 24px 0 0", padding:"24px 20px 44px", width:"100%", maxWidth:440 }}>
         <div style={{ width:36, height:4, background:"#e0e0e0", borderRadius:2, margin:"0 auto 18px" }} />
-        <div style={{ fontSize:16, fontWeight:800, fontFamily:"Georgia,serif", color:"#1a1a2e", marginBottom:4 }}>Swap Exercise 换一个</div>
-        <div style={{ fontSize:12, color:"#aaa", fontFamily:"sans-serif", marginBottom:16 }}>
+        <div style={{ fontSize:16, fontWeight:600, fontFamily:FONT_EN, color:"#000000", marginBottom:4 }}>Swap Exercise 换一个</div>
+        <div style={{ fontSize:12, color:"#aaa", fontFamily:FONT_ZH, marginBottom:16 }}>
           替换 <strong style={{ color:"#FD9033" }}>{exercise.en}</strong> · 无器械 / 初学者友好
         </div>
         {(exercise.alts||[]).map((alt, i) => (
           <div key={i} onClick={() => onSelect(alt)} style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", borderRadius:14, marginBottom:8, cursor:"pointer", background:"#f8f8fc", border:"1.5px solid #f0f0f0" }}>
             <div style={{ flex:1 }}>
-              <div style={{ fontWeight:700, fontSize:14, color:"#1a1a2e", fontFamily:"Georgia,serif" }}>{alt.en}</div>
-              <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>{alt.zh}</div>
+              <div style={{ fontWeight:700, fontSize:14, color:"#000000", fontFamily:FONT_EN }}>{alt.en}</div>
+              <div style={{ fontSize:12, color:"#888", fontFamily:FONT_ZH }}>{alt.zh}</div>
             </div>
             <div style={{ textAlign:"right" }}>
-              <div style={{ fontSize:11, color:"#FD9033", fontFamily:"sans-serif" }}>{alt.why_en}</div>
-              <div style={{ fontSize:10, color:"#bbb", fontFamily:"sans-serif" }}>{alt.why_zh}</div>
+              <div style={{ fontSize:11, color:"#FD9033", fontFamily:FONT_ZH }}>{alt.why_en}</div>
+              <div style={{ fontSize:10, color:"#bbb", fontFamily:FONT_ZH }}>{alt.why_zh}</div>
             </div>
           </div>
         ))}
@@ -255,20 +296,20 @@ function PlanTab({ onStartWorkout }) {
   return (
     <div>
       {/* 日期条 */}
-      <div style={{ display:"flex", gap:6, overflowX:"auto", padding:"4px 0 14px", scrollbarWidth:"none" }}>
+      <div style={{ display:"flex", gap:6, padding:"4px 0 14px" }}>
         {DAYS.map((d, i) => {
           const t = WORKOUT_TYPES.find(w => w.type === (dayTypes[i]||"rest")) || WORKOUT_TYPES[7];
           return (
             <button key={i} onClick={() => { setSel(i); setEditing(false); }} style={{
-              minWidth:54, padding:"10px 0", borderRadius:14, border:"none",
-              background: i===sel ? "#1a1a2e" : t.color,
-              color: i===sel ? "#fff" : "#333",
-              cursor:"pointer", fontFamily:"sans-serif", transition:"all 0.2s",
-              boxShadow: i===sel ? "0 4px 14px rgba(26,26,46,0.3)" : "none",
-              position:"relative", flexShrink:0,
+              flex:1, minWidth:0, padding:"10px 0", borderRadius:14,
+              border: i===sel ? "1.5px solid #000000" : "1.5px solid #f0f0f0",
+              background: i===sel ? "#000000" : "#ffffff",
+              color: i===sel ? "#ffffff" : "#999999",
+              cursor:"pointer", fontFamily:FONT_ZH, transition:"all 0.2s",
+              position:"relative",
             }}>
-              {i===todayIdx && <span style={{ position:"absolute", top:5, right:7, width:6, height:6, borderRadius:"50%", background:"#FF6B6B", display:"block" }} />}
-              <div style={{ fontSize:12, fontWeight:700 }}>{d}</div>
+              {i===todayIdx && <span style={{ position:"absolute", top:6, left:"50%", transform:"translateX(-50%)", width:5, height:5, borderRadius:"50%", background: i===sel?"#fff":"#000", display:"block" }} />}
+              <div style={{ fontSize:12, fontWeight:600 }}>{d}</div>
               <div style={{ fontSize:10, marginTop:2, opacity:0.8 }}>{DAYS_ZH[i]}</div>
               <div style={{ fontSize:12, marginTop:1 }}>{t.emoji}</div>
             </button>
@@ -279,21 +320,21 @@ function PlanTab({ onStartWorkout }) {
       {/* 训练类型选择器（编辑模式）*/}
       {editing ? (
         <div style={{ ...S.card }}>
-          <div style={{ fontSize:16, fontWeight:900, color:"#1a1a2e", fontFamily:"sans-serif", marginBottom:2 }}>
+          <div style={{ fontSize:16, fontWeight:700, color:"#000000", fontFamily:FONT_ZH, marginBottom:2 }}>
             {DAYS_ZH[sel]} · 练什么？
           </div>
-          <div style={{ fontSize:12, color:"#aaa", fontFamily:"sans-serif", marginBottom:14 }}>选一个训练类型，下次打开自动记住</div>
+          <div style={{ fontSize:12, color:"#aaa", fontFamily:FONT_ZH, marginBottom:14 }}>选一个训练类型，下次打开自动记住</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
             {WORKOUT_TYPES.map((w) => (
               <div key={w.type} onClick={() => saveDayType(sel, w.type)} style={{
                 padding:"14px 12px", borderRadius:14, cursor:"pointer", textAlign:"center",
-                background: currentType===w.type ? "#1a1a2e" : w.color,
-                border: currentType===w.type ? "2px solid #1a1a2e" : "2px solid transparent",
+                background: currentType===w.type ? "#000000" : w.color,
+                border: currentType===w.type ? "2px solid #000000" : "2px solid transparent",
                 transition:"all 0.15s",
               }}>
                 <div style={{ fontSize:24 }}>{w.emoji}</div>
-                <div style={{ fontSize:14, fontWeight:800, color: currentType===w.type ? "#fff" : "#1a1a2e", fontFamily:"sans-serif", marginTop:4 }}>{w.zh}</div>
-                <div style={{ fontSize:10, color: currentType===w.type ? "#FECB8A" : "#aaa", fontFamily:"sans-serif" }}>{w.label}</div>
+                <div style={{ fontSize:14, fontWeight:600, color: currentType===w.type ? "#fff" : "#000000", fontFamily:FONT_EN, marginTop:4 }}>{w.label}</div>
+                <div style={{ fontSize:10, color: currentType===w.type ? "#FECB8A" : "#999", fontFamily:FONT_ZH }}>{w.zh}</div>
               </div>
             ))}
           </div>
@@ -307,12 +348,12 @@ function PlanTab({ onStartWorkout }) {
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <span style={{ fontSize:24 }}>{currentWT.emoji}</span>
                 <div>
-                  <div style={{ fontSize:20, fontWeight:900, color:"#1a1a2e", fontFamily:"sans-serif" }}>{currentWT.zh}</div>
-                  <div style={{ fontSize:12, color:"#FD9033", fontFamily:"Georgia,serif", fontWeight:700 }}>{currentWT.label}</div>
+                  <div style={{ fontSize:20, fontWeight:700, color:"#000000", fontFamily:FONT_EN }}>{currentWT.label}</div>
+                  <div style={{ fontSize:12, color:"#999", fontFamily:FONT_ZH, fontWeight:600 }}>{currentWT.zh}</div>
                 </div>
               </div>
               {exercises.length > 0 && (
-                <div style={{ fontSize:11, color:"#bbb", marginTop:6, fontFamily:"sans-serif" }}>
+                <div style={{ fontSize:11, color:"#bbb", marginTop:6, fontFamily:FONT_ZH }}>
                   {exercises.length} 个动作 · 共 {exercises.reduce((s,e)=>s+e.sets,0)} 组
                 </div>
               )}
@@ -322,7 +363,7 @@ function PlanTab({ onStartWorkout }) {
                 ✏️ 换训练
               </button>
               {exercises.length > 0 && (
-                <button onClick={() => onStartWorkout(exercises)} style={{ ...S.btn("#1a1a2e","#fff"), fontSize:12 }}>
+                <button onClick={() => onStartWorkout(exercises)} style={{ ...S.btn("#000000","#fff"), fontSize:12 }}>
                   开始 ▶
                 </button>
               )}
@@ -333,8 +374,8 @@ function PlanTab({ onStartWorkout }) {
           {exercises.length === 0 ? (
             <div style={{ textAlign:"center", padding:"24px 0" }}>
               <div style={{ fontSize:40 }}>☀️</div>
-              <div style={{ marginTop:8, fontSize:16, fontWeight:700, color:"#333", fontFamily:"sans-serif" }}>休息日</div>
-              <div style={{ fontSize:12, color:"#bbb", marginTop:4, fontFamily:"sans-serif" }}>Rest day · 恢复也是训练的一部分</div>
+              <div style={{ marginTop:8, fontSize:16, fontWeight:700, color:"#333", fontFamily:FONT_ZH }}>休息日</div>
+              <div style={{ fontSize:12, color:"#bbb", marginTop:4, fontFamily:FONT_ZH }}>Rest day · 恢复也是训练的一部分</div>
               <button onClick={() => setEditing(true)} style={{ ...S.btn("#FFF3E0","#C95F00"), marginTop:14, fontSize:12 }}>
                 今天想练？换个训练 →
               </button>
@@ -343,14 +384,14 @@ function PlanTab({ onStartWorkout }) {
             <>
               {exercises.map(ex => (
                 <div key={ex.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f5f5f5" }}>
-                  <span style={{ fontSize:26, width:34, textAlign:"center" }}>{ex.emoji}</span>
+                  <EmojiBadge emoji={ex.emoji} id={ex.id} size={42} />
                   <div style={{ flex:1 }}>
-                    <div style={{ fontWeight:800, fontSize:14, color:"#1a1a2e", fontFamily:"sans-serif" }}>{ex.zh}</div>
-                    <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
-                    <div style={{ fontSize:10, color:"#bbb", fontFamily:"sans-serif" }}>{ex.muscle_zh}</div>
+                    <div style={{ fontWeight:600, fontSize:14, color:"#000000", fontFamily:FONT_EN }}>{ex.en}</div>
+                    <div style={{ fontSize:11, color:"#999", fontFamily:FONT_ZH }}>{ex.zh}</div>
+                    <div style={{ fontSize:10, color:"#bbb", fontFamily:FONT_EN }}>{ex.muscle_en}</div>
                   </div>
                   <div style={{ textAlign:"right" }}>
-                    <div style={{ fontFamily:"monospace", fontSize:14, color:"#FD9033", fontWeight:800 }}>
+                    <div style={{ fontFamily:"monospace", fontSize:14, color:"#FD9033", fontWeight:600 }}>
                       {ex.sets}×{ex.isTime ? `${ex.reps}s` : ex.reps}
                     </div>
                     <div style={{ fontSize:10, color:"#ddd" }}>{ex.rest}s 休息</div>
@@ -359,7 +400,7 @@ function PlanTab({ onStartWorkout }) {
               ))}
               <div style={{ marginTop:12, padding:"10px 14px", background:"#f8f8fc", borderRadius:12, display:"flex", alignItems:"center", gap:10 }}>
                 <span style={{ fontSize:16 }}>💡</span>
-                <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>
+                <div style={{ fontSize:11, color:"#888", fontFamily:FONT_ZH }}>
                   跟练时点 <strong>「换一个」</strong> 可替换为无器械替代动作
                 </div>
               </div>
@@ -433,16 +474,16 @@ function WorkoutTab({ exercises: initExercises }) {
   if (phase === "preview") return (
     <div>
       {swapTarget && <SwapModal exercise={swapTarget} onSelect={handleSwap} onClose={() => setSwapTarget(null)} />}
-      <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif", marginBottom:10 }}>
+      <div style={{ fontSize:12, color:"#888", fontFamily:FONT_ZH, marginBottom:10 }}>
         Tap an exercise to customize · 点击展开 · 「换一个」替换动作
       </div>
       {exerciseList.map(ex => (
         <div key={ex.id} style={{ ...S.card, marginBottom:8, padding:"14px 16px" }}>
           <div style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }} onClick={() => setExpanded(expanded===ex.id?null:ex.id)}>
-            <span style={{ fontSize:26 }}>{ex.emoji}</span>
+            <EmojiBadge emoji={ex.emoji} id={ex.id} size={42} />
             <div style={{ flex:1 }}>
-              <div style={{ fontWeight:800, fontSize:15, fontFamily:"sans-serif", color:"#1a1a2e" }}>{ex.zh} <span style={{ color:"#FD9033", fontWeight:600, fontSize:12, fontFamily:"Georgia,serif" }}>{ex.en}</span></div>
-              <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif" }}>{ex.muscle_zh}</div>
+              <div style={{ fontWeight:600, fontSize:15, fontFamily:FONT_EN, color:"#000000" }}>{ex.en} <span style={{ color:"#999", fontWeight:600, fontSize:12, fontFamily:FONT_ZH }}>{ex.zh}</span></div>
+              <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_EN }}>{ex.muscle_en}</div>
             </div>
             <div style={{ textAlign:"right" }}>
               <div style={{ fontSize:14, fontWeight:700, color:"#FD9033", fontFamily:"monospace" }}>{getSets(ex)}×{ex.isTime?`${getReps(ex)}s`:getReps(ex)}</div>
@@ -454,30 +495,30 @@ function WorkoutTab({ exercises: initExercises }) {
               <div style={{ display:"flex", gap:16, marginBottom:12 }}>
                 {[["Sets 组数", getSets, setCustomSets, 1], [ex.isTime?"Seconds 秒":"Reps 次数", getReps, setCustomReps, 1]].map(([label, getter, setter, min], idx) => (
                   <div key={idx} style={{ flex:1 }}>
-                    <div style={{ fontSize:11, color:"#999", marginBottom:6, fontFamily:"sans-serif" }}>{label}</div>
+                    <div style={{ fontSize:11, color:"#999", marginBottom:6, fontFamily:FONT_ZH }}>{label}</div>
                     <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                       <button onClick={(e)=>{e.stopPropagation();setter(p=>({...p,[ex.id]:Math.max(min,getter(ex)-1)}))}} style={{ width:30,height:30,borderRadius:"50%",border:"1.5px solid #ddd",background:"#fff",fontSize:16,cursor:"pointer" }}>−</button>
-                      <span style={{ fontSize:18, fontWeight:800, width:28, textAlign:"center", fontFamily:"monospace" }}>{getter(ex)}</span>
+                      <span style={{ fontSize:18, fontWeight:600, width:28, textAlign:"center", fontFamily:"monospace" }}>{getter(ex)}</span>
                       <button onClick={(e)=>{e.stopPropagation();setter(p=>({...p,[ex.id]:getter(ex)+1}))}} style={{ width:30,height:30,borderRadius:"50%",border:"1.5px solid #ddd",background:"#fff",fontSize:16,cursor:"pointer" }}>+</button>
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize:12, color:"#555", fontFamily:"sans-serif", lineHeight:1.7, background:"#f8f8fc", borderRadius:10, padding:"10px 12px", marginBottom:10 }}>
+              <div style={{ fontSize:12, color:"#555", fontFamily:FONT_ZH, lineHeight:1.7, background:"#f8f8fc", borderRadius:10, padding:"10px 12px", marginBottom:10 }}>
                 <strong>🎯</strong> {ex.tip_en}<br/>
                 <span style={{ color:"#aaa" }}>✅ {ex.tip_zh}</span>
               </div>
 
               {/* Inline Video Player - 自适应比例 */}
-              <div style={{ borderRadius:12, overflow:"hidden", background:"#1a1a2e", marginBottom:10 }}>
+              <div style={{ borderRadius:12, overflow:"hidden", background:"#000000", marginBottom:10 }}>
                 {ex.videoUrl ? (
-                  <video src={ex.videoUrl} controls playsInline style={{ width:"100%", display:"block", maxHeight:500, objectFit:"contain", background:"#1a1a2e" }} />
+                  <video src={ex.videoUrl} controls playsInline style={{ width:"100%", display:"block", maxHeight:500, objectFit:"contain", background:"#000000" }} />
                 ) : (
                   <div style={{ height:160, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:6 }}>
                     <div style={{ fontSize:34 }}>{ex.emoji}</div>
-                    <div style={{ fontSize:14, fontWeight:800, color:"#fff", fontFamily:"sans-serif" }}>{ex.zh}</div>
-                    <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
-                    <div style={{ fontSize:10, color:"#F4A84A", fontFamily:"sans-serif", letterSpacing:0.8 }}>示范视频即将上线 · Coming Soon</div>
+                    <div style={{ fontSize:14, fontWeight:600, color:"#fff", fontFamily:FONT_EN }}>{ex.en}</div>
+                    <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", fontFamily:FONT_ZH }}>{ex.zh}</div>
+                    <div style={{ fontSize:10, color:"#F4A84A", fontFamily:FONT_EN, letterSpacing:0.8 }}>Coming Soon · 示范视频即将上线</div>
                   </div>
                 )}
               </div>
@@ -489,7 +530,7 @@ function WorkoutTab({ exercises: initExercises }) {
           )}
         </div>
       ))}
-      <button onClick={() => setPhase("active")} style={{ ...S.btn("#1a1a2e","#fff",true), marginTop:4 }}>
+      <button onClick={() => setPhase("active")} style={{ ...S.btn("#000000","#fff",true), marginTop:4 }}>
         🔥 Start Workout · 开始跟练
       </button>
     </div>
@@ -500,32 +541,32 @@ function WorkoutTab({ exercises: initExercises }) {
     return (
       <div style={{ textAlign:"center", padding:"40px 20px" }}>
         <div style={{ fontSize:64 }}>🎉</div>
-        <div style={{ fontSize:26, fontWeight:800, fontFamily:"Georgia,serif", color:"#1a1a2e", marginTop:16 }}>Workout Complete!</div>
-        <div style={{ fontSize:15, color:"#888", marginTop:6, fontFamily:"sans-serif" }}>太厉害了！今天完成 {totalSets} 组训练</div>
+        <div style={{ fontSize:26, fontWeight:600, fontFamily:FONT_EN, color:"#000000", marginTop:16 }}>Workout Complete!</div>
+        <div style={{ fontSize:15, color:"#888", marginTop:6, fontFamily:FONT_ZH }}>太厉害了！今天完成 {totalSets} 组训练</div>
         <div style={{ display:"flex", gap:12, justifyContent:"center", marginTop:24 }}>
           <div style={{ background:"#E6F4F4", borderRadius:16, padding:"16px 24px", textAlign:"center" }}>
-            <div style={{ fontSize:26, fontWeight:800, color:"#388e3c", fontFamily:"Georgia,serif" }}>{exerciseList.length}</div>
-            <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>Exercises 动作</div>
+            <div style={{ fontSize:26, fontWeight:600, color:"#388e3c", fontFamily:FONT_EN }}>{exerciseList.length}</div>
+            <div style={{ fontSize:11, color:"#888", fontFamily:FONT_ZH }}>Exercises 动作</div>
           </div>
           <div style={{ background:"#e3f2fd", borderRadius:16, padding:"16px 24px", textAlign:"center" }}>
-            <div style={{ fontSize:26, fontWeight:800, color:"#1565c0", fontFamily:"Georgia,serif" }}>{totalSets}</div>
-            <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>Total Sets 总组数</div>
+            <div style={{ fontSize:26, fontWeight:600, color:"#1565c0", fontFamily:FONT_EN }}>{totalSets}</div>
+            <div style={{ fontSize:11, color:"#888", fontFamily:FONT_ZH }}>Total Sets 总组数</div>
           </div>
         </div>
-        <button onClick={reset} style={{ ...S.btn("#1a1a2e","#fff",true), marginTop:24 }}>Reset · 重新开始</button>
+        <button onClick={reset} style={{ ...S.btn("#000000","#fff",true), marginTop:24 }}>Reset · 重新开始</button>
       </div>
     );
   }
 
   if (phase === "rest") return (
     <div style={{ textAlign:"center", padding:"24px 0" }}>
-      <div style={{ fontSize:13, color:"#888", fontFamily:"sans-serif", letterSpacing:2, marginBottom:8 }}>REST TIME · 休息中</div>
-      <div style={{ fontSize:88, fontWeight:900, fontFamily:"Georgia,serif", color: timer <= 10 ? "#e53935" : "#1a1a2e", transition:"color 0.5s", lineHeight:1 }}>{timer}</div>
-      <div style={{ fontSize:14, color:"#aaa", fontFamily:"sans-serif", marginBottom:20 }}>seconds · 秒</div>
+      <div style={{ fontSize:13, color:"#888", fontFamily:FONT_EN, letterSpacing:2, marginBottom:8 }}>REST TIME · 休息中</div>
+      <div style={{ fontSize:88, fontWeight:700, fontFamily:FONT_EN, color: timer <= 10 ? "#e53935" : "#000000", transition:"color 0.5s", lineHeight:1 }}>{timer}</div>
+      <div style={{ fontSize:14, color:"#aaa", fontFamily:FONT_EN, marginBottom:20 }}>seconds · 秒</div>
       <div style={{ background:"#f8f8fc", borderRadius:14, padding:"14px", marginBottom:16 }}>
-        <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>下一个动作 · Next up</div>
-        <div style={{ fontSize:18, fontWeight:800, color:"#1a1a2e", fontFamily:"sans-serif", marginTop:4 }}>{exerciseList[exIdx]?.zh}</div>
-        <div style={{ fontSize:12, color:"#FD9033", fontFamily:"Georgia,serif" }}>{exerciseList[exIdx]?.en} · 第 {setIdx+1}/{getSets(exerciseList[exIdx])} 组</div>
+        <div style={{ fontSize:12, color:"#888", fontFamily:FONT_EN }}>Next up · 下一个动作</div>
+        <div style={{ fontSize:18, fontWeight:600, color:"#000000", fontFamily:FONT_EN, marginTop:4 }}>{exerciseList[exIdx]?.en}</div>
+        <div style={{ fontSize:12, color:"#999", fontFamily:FONT_ZH }}>{exerciseList[exIdx]?.zh} · Set {setIdx+1}/{getSets(exerciseList[exIdx])} · 第{setIdx+1}/{getSets(exerciseList[exIdx])}组</div>
       </div>
       <button onClick={skipRest} style={{ ...S.btn("#f0f0f7","#555") }}>Skip Rest · 跳过休息</button>
     </div>
@@ -541,7 +582,7 @@ function WorkoutTab({ exercises: initExercises }) {
       <div style={{ background:"#f0f0f0", borderRadius:8, height:6, marginBottom:8, overflow:"hidden" }}>
         <div style={{ width:`${progress}%`, height:"100%", background:"linear-gradient(90deg,#FD9033,#62B1B8)", borderRadius:8, transition:"width 0.5s" }} />
       </div>
-      <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif", marginBottom:10, textAlign:"center" }}>
+      <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_ZH, marginBottom:10, textAlign:"center" }}>
         第 {exIdx+1} / {exerciseList.length} 个动作 · 第 {setIdx+1} / {getSets(ex)} 组
       </div>
 
@@ -550,58 +591,58 @@ function WorkoutTab({ exercises: initExercises }) {
 
         {/* 换一个按钮浮层 */}
         {ex.alts && ex.alts.length > 0 && (
-          <button onClick={() => setSwapTarget(ex)} style={{ position:"absolute", top:12, right:12, zIndex:2, background:"rgba(255,255,255,0.92)", color:"#C95F00", border:"none", borderRadius:20, padding:"5px 12px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:"sans-serif", boxShadow:"0 2px 8px rgba(0,0,0,0.15)" }}>
+          <button onClick={() => setSwapTarget(ex)} style={{ position:"absolute", top:12, right:12, zIndex:2, background:"rgba(255,255,255,0.92)", color:"#C95F00", border:"none", borderRadius:20, padding:"5px 12px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FONT_ZH, boxShadow:"0 2px 8px rgba(0,0,0,0.15)" }}>
             🔄 换一个
           </button>
         )}
 
         {/* ① 视频 — 最顶部，自适应比例 */}
-        <div style={{ background:"#1a1a2e", width:"100%", overflow:"hidden" }}>
+        <div style={{ background:"#000000", width:"100%", overflow:"hidden" }}>
           {ex.videoUrl ? (
-            <video src={ex.videoUrl} controls playsInline style={{ width:"100%", display:"block", maxHeight:500, objectFit:"contain", background:"#1a1a2e" }} />
+            <video src={ex.videoUrl} controls playsInline style={{ width:"100%", display:"block", maxHeight:500, objectFit:"contain", background:"#000000" }} />
           ) : (
             <div style={{ height:170, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
               <div style={{ fontSize:48 }}>{ex.emoji}</div>
-              <div style={{ fontSize:16, fontWeight:800, color:"#fff", fontFamily:"sans-serif" }}>{ex.zh}</div>
-              <div style={{ fontSize:11, color:"#FD9033", fontFamily:"Georgia,serif" }}>{ex.en}</div>
-              <div style={{ fontSize:10, color:"#F4A84A", fontFamily:"sans-serif", marginTop:2 }}>示范视频即将上线 · Coming Soon</div>
+              <div style={{ fontSize:16, fontWeight:600, color:"#fff", fontFamily:FONT_EN }}>{ex.en}</div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", fontFamily:FONT_ZH }}>{ex.zh}</div>
+              <div style={{ fontSize:10, color:"#F4A84A", fontFamily:FONT_EN, marginTop:2 }}>Coming Soon · 示范视频即将上线</div>
             </div>
           )}
         </div>
 
         <div style={{ padding:"16px 18px 18px", textAlign:"center" }}>
           {/* ② 动作名 */}
-          <div style={{ fontSize:26, fontWeight:900, color:"#1a1a2e", fontFamily:"sans-serif" }}>{ex.zh}</div>
-          <div style={{ fontSize:13, color:"#FD9033", fontWeight:700, fontFamily:"Georgia,serif", marginTop:2 }}>{ex.en}</div>
-          <div style={{ fontSize:11, color:"#ccc", marginTop:2, fontFamily:"sans-serif" }}>{ex.muscle_zh} · {ex.muscle_en}</div>
+          <div style={{ fontSize:26, fontWeight:700, color:"#000000", fontFamily:FONT_EN }}>{ex.en}</div>
+          <div style={{ fontSize:13, color:"#999", fontWeight:600, fontFamily:FONT_ZH, marginTop:2 }}>{ex.zh}</div>
+          <div style={{ fontSize:11, color:"#ccc", marginTop:2, fontFamily:FONT_EN }}>{ex.muscle_en} · {ex.muscle_zh}</div>
 
           {/* ③ 组数/次数 */}
           <div style={{ display:"flex", gap:10, justifyContent:"center", marginTop:14 }}>
             <div style={{ background:"#FFF3E0", borderRadius:14, padding:"10px 28px", textAlign:"center" }}>
-              <div style={{ fontSize:30, fontWeight:900, color:"#FD9033", fontFamily:"Georgia,serif", lineHeight:1 }}>{getReps(ex)}{ex.isTime?"s":""}</div>
-              <div style={{ fontSize:13, color:"#1a1a2e", fontWeight:700, fontFamily:"sans-serif", marginTop:2 }}>{ex.isTime?"秒":"次"}</div>
-              <div style={{ fontSize:9, color:"#FECB8A", fontFamily:"sans-serif" }}>{ex.isTime?"Seconds":"Reps"}</div>
+              <div style={{ fontSize:30, fontWeight:700, color:"#000000", fontFamily:FONT_EN, lineHeight:1 }}>{getReps(ex)}{ex.isTime?"s":""}</div>
+              <div style={{ fontSize:13, color:"#000000", fontWeight:600, fontFamily:FONT_EN, marginTop:2 }}>{ex.isTime?"Seconds":"Reps"}</div>
+              <div style={{ fontSize:9, color:"#999", fontFamily:FONT_ZH }}>{ex.isTime?"秒":"次"}</div>
             </div>
             <div style={{ background:"#E8F6F7", borderRadius:14, padding:"10px 28px", textAlign:"center" }}>
-              <div style={{ fontSize:30, fontWeight:900, color:"#62B1B8", fontFamily:"Georgia,serif", lineHeight:1 }}>{setIdx+1}<span style={{ fontSize:16, color:"#A8D8DC" }}>/{getSets(ex)}</span></div>
-              <div style={{ fontSize:13, color:"#1a1a2e", fontWeight:700, fontFamily:"sans-serif", marginTop:2 }}>组</div>
-              <div style={{ fontSize:9, color:"#A8D8DC", fontFamily:"sans-serif" }}>Set</div>
+              <div style={{ fontSize:30, fontWeight:700, color:"#62B1B8", fontFamily:FONT_EN, lineHeight:1 }}>{setIdx+1}<span style={{ fontSize:16, color:"#A8D8DC" }}>/{getSets(ex)}</span></div>
+              <div style={{ fontSize:13, color:"#000000", fontWeight:700, fontFamily:FONT_EN, marginTop:2 }}>Set</div>
+              <div style={{ fontSize:9, color:"#A8D8DC", fontFamily:FONT_ZH }}>组</div>
             </div>
           </div>
 
           {/* ④ Coaching Cues */}
           <div style={{ marginTop:14, background:"#f8f8fc", borderRadius:12, padding:"11px 14px", textAlign:"left" }}>
-            <div style={{ fontSize:10, color:"#bbb", fontFamily:"sans-serif", marginBottom:5, letterSpacing:1 }}>动作要点 · COACHING CUES</div>
+            <div style={{ fontSize:10, color:"#bbb", fontFamily:FONT_EN, marginBottom:5, letterSpacing:1 }}>COACHING CUES · 动作要点</div>
             {ex.cues.map((c,i) => (
-              <div key={i} style={{ fontSize:13, color:"#444", padding:"2px 0", fontFamily:"sans-serif" }}>
-                <span style={{ color:"#FD9033", marginRight:6, fontWeight:800 }}>{i+1}.</span>{c}
+              <div key={i} style={{ fontSize:13, color:"#444", padding:"2px 0", fontFamily:FONT_ZH }}>
+                <span style={{ color:"#FD9033", marginRight:6, fontWeight:600 }}>{i+1}.</span>{c}
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <button onClick={finishSet} style={{ ...S.btn("#1a1a2e","#fff",true) }}>
+      <button onClick={finishSet} style={{ ...S.btn("#000000","#fff",true) }}>
         ✅ 完成这组 · Set Done
       </button>
     </div>
@@ -637,9 +678,9 @@ function DietTab() {
           { label:"% goal",sublabel:"目标达成",val:`${Math.round(Math.min(totalKcal/targetKcal,1)*100)}%`,bg:"#E8F6F7",color:"#C95F00" },
         ].map((s,i) => (
           <div key={i} style={{ flex:1, background:s.bg, borderRadius:14, padding:"12px 8px", textAlign:"center" }}>
-            <div style={{ fontSize:20, fontWeight:800, color:s.color, fontFamily:"Georgia,serif" }}>{s.val}</div>
-            <div style={{ fontSize:9, color:"#888", fontFamily:"sans-serif" }}>{s.label}</div>
-            <div style={{ fontSize:9, color:"#bbb", fontFamily:"sans-serif" }}>{s.sublabel}</div>
+            <div style={{ fontSize:20, fontWeight:600, color:s.color, fontFamily:FONT_EN }}>{s.val}</div>
+            <div style={{ fontSize:9, color:"#888", fontFamily:FONT_ZH }}>{s.label}</div>
+            <div style={{ fontSize:9, color:"#bbb", fontFamily:FONT_ZH }}>{s.sublabel}</div>
           </div>
         ))}
       </div>
@@ -649,7 +690,7 @@ function DietTab() {
       {Object.entries(mealLabels).map(([meal, [en, zh, emoji]]) => (
         <div key={meal} style={{ ...S.card }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-            <div style={{ fontWeight:700, fontSize:15, fontFamily:"Georgia,serif", color:"#1a1a2e" }}>
+            <div style={{ fontWeight:700, fontSize:15, fontFamily:FONT_EN, color:"#000000" }}>
               {emoji} {en} <span style={{ fontWeight:400, fontSize:12, color:"#aaa" }}>{zh}</span>
             </div>
             <button onClick={() => setAdding(adding===meal?null:meal)} style={{ ...S.btn(adding===meal?"#E8F6F7":"#f0f0f7", adding===meal?"#C95F00":"#FD9033"), fontSize:12, padding:"6px 14px" }}>
@@ -659,8 +700,8 @@ function DietTab() {
           {meals[meal].map((f,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 0", borderBottom:"1px solid #f8f8f8" }}>
               <div style={{ flex:1 }}>
-                <div style={{ fontSize:13, color:"#333", fontFamily:"sans-serif" }}>{f.name_en}</div>
-                <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif" }}>{f.name_zh}</div>
+                <div style={{ fontSize:13, color:"#333", fontFamily:FONT_ZH }}>{f.name_en}</div>
+                <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_ZH }}>{f.name_zh}</div>
               </div>
               <span style={{ fontSize:12, color:"#FD9033", fontWeight:700, fontFamily:"monospace" }}>{f.kcal} kcal</span>
               <span style={{ fontSize:11, color:"#81c784", fontFamily:"monospace" }}>{f.protein}g P</span>
@@ -669,13 +710,13 @@ function DietTab() {
           ))}
           {adding === meal && (
             <div style={{ marginTop:12, background:"#f8f8fc", borderRadius:12, padding:14 }}>
-              <input placeholder="Search food / 搜索食物..." value={query} onChange={e => setQuery(e.target.value)} style={{ width:"100%", border:"1.5px solid #e0e0e0", borderRadius:10, padding:"10px 12px", fontSize:13, fontFamily:"sans-serif", boxSizing:"border-box", outline:"none" }} />
+              <input placeholder="Search food / 搜索食物..." value={query} onChange={e => setQuery(e.target.value)} style={{ width:"100%", border:"1.5px solid #e0e0e0", borderRadius:10, padding:"10px 12px", fontSize:13, fontFamily:FONT_ZH, boxSizing:"border-box", outline:"none" }} />
               <div style={{ maxHeight:160, overflowY:"auto", marginTop:8 }}>
                 {filtered.map((f,i) => (
                   <div key={i} onClick={() => addFood(meal,f)} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 4px", borderBottom:"1px solid #f0f0f0", cursor:"pointer" }}>
                     <div>
-                      <div style={{ fontSize:13, color:"#333", fontFamily:"sans-serif" }}>{f.name_en}</div>
-                      <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif" }}>{f.name_zh}</div>
+                      <div style={{ fontSize:13, color:"#333", fontFamily:FONT_ZH }}>{f.name_en}</div>
+                      <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_ZH }}>{f.name_zh}</div>
                     </div>
                     <div style={{ textAlign:"right" }}>
                       <div style={{ fontSize:12, color:"#FD9033", fontWeight:700 }}>{f.kcal} kcal</div>
@@ -685,13 +726,13 @@ function DietTab() {
                 ))}
               </div>
               <div style={{ borderTop:"1px dashed #ddd", paddingTop:10, marginTop:8 }}>
-                <div style={{ fontSize:11, color:"#aaa", marginBottom:8, fontFamily:"sans-serif" }}>Or enter manually · 或手动输入</div>
+                <div style={{ fontSize:11, color:"#aaa", marginBottom:8, fontFamily:FONT_ZH }}>Or enter manually · 或手动输入</div>
                 <div style={{ display:"flex", gap:6 }}>
-                  <input placeholder="Name 名称" value={customName} onChange={e=>setCustomName(e.target.value)} style={{ flex:2, border:"1.5px solid #e0e0e0", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:"sans-serif", outline:"none" }} />
-                  <input placeholder="kcal" value={customKcal} onChange={e=>setCustomKcal(e.target.value)} type="number" style={{ flex:1, border:"1.5px solid #e0e0e0", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:"sans-serif", outline:"none" }} />
-                  <input placeholder="P(g)" value={customProtein} onChange={e=>setCustomProtein(e.target.value)} type="number" style={{ flex:1, border:"1.5px solid #e0e0e0", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:"sans-serif", outline:"none" }} />
+                  <input placeholder="Name 名称" value={customName} onChange={e=>setCustomName(e.target.value)} style={{ flex:2, border:"1.5px solid #e0e0e0", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:FONT_ZH, outline:"none" }} />
+                  <input placeholder="kcal" value={customKcal} onChange={e=>setCustomKcal(e.target.value)} type="number" style={{ flex:1, border:"1.5px solid #e0e0e0", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:FONT_ZH, outline:"none" }} />
+                  <input placeholder="P(g)" value={customProtein} onChange={e=>setCustomProtein(e.target.value)} type="number" style={{ flex:1, border:"1.5px solid #e0e0e0", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:FONT_ZH, outline:"none" }} />
                 </div>
-                <button onClick={() => addCustom(meal)} style={{ ...S.btn("#1a1a2e","#fff",true), marginTop:8 }}>Add 添加</button>
+                <button onClick={() => addCustom(meal)} style={{ ...S.btn("#000000","#fff",true), marginTop:8 }}>Add 添加</button>
               </div>
             </div>
           )}
@@ -767,8 +808,8 @@ Return ONLY a valid JSON array, no markdown:
     <div>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
         <div>
-          <div style={{ fontSize:16, fontWeight:800, fontFamily:"Georgia,serif", color:"#1a1a2e" }}>Today's Words 今日词汇</div>
-          <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif" }}>AI generated · 已学 {learned.length} 词 · {todayKey}</div>
+          <div style={{ fontSize:16, fontWeight:600, fontFamily:FONT_EN, color:"#000000" }}>Today's Words 今日词汇</div>
+          <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_ZH }}>AI generated · 已学 {learned.length} 词 · {todayKey}</div>
         </div>
         <button onClick={generateVocab} disabled={loading} style={{ ...S.btn("#f0f0f7","#FD9033"), fontSize:12, padding:"8px 14px" }}>
           {loading ? "Generating..." : "🔄 New Batch"}
@@ -776,7 +817,7 @@ Return ONLY a valid JSON array, no markdown:
       </div>
 
       {loading ? (
-        <div style={{ textAlign:"center", padding:"40px 0", color:"#aaa", fontFamily:"sans-serif" }}>
+        <div style={{ textAlign:"center", padding:"40px 0", color:"#aaa", fontFamily:FONT_ZH }}>
           <div style={{ fontSize:36, marginBottom:10 }}>✨</div>
           AI is generating today's words...<br/>正在为你生成今日词汇
         </div>
@@ -786,22 +827,22 @@ Return ONLY a valid JSON array, no markdown:
             {words.map((w,i) => (
               <div key={i} onClick={() => setFlipped(p=>({...p,[i]:!p[i]}))} style={{
                 borderRadius:18, padding:"18px 14px", textAlign:"center", cursor:"pointer",
-                background: flipped[i] ? "#1a1a2e" : "#fff",
-                border:"1.5px solid " + (flipped[i] ? "#1a1a2e" : "#f0f0f0"),
+                background: flipped[i] ? "#000000" : "#fff",
+                border:"1.5px solid " + (flipped[i] ? "#000000" : "#f0f0f0"),
                 boxShadow:"0 3px 14px rgba(0,0,0,0.07)", transition:"all 0.3s",
                 minHeight:110, display:"flex", flexDirection:"column", justifyContent:"center",
               }}>
                 {!flipped[i] ? (
                   <>
-                    <div style={{ fontSize:13, fontWeight:800, color:"#1a1a2e", fontFamily:"Georgia,serif", lineHeight:1.3 }}>{w.en}</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"#000000", fontFamily:FONT_EN, lineHeight:1.3 }}>{w.en}</div>
                     <div style={{ fontSize:10, color:"#aaa", marginTop:6, fontFamily:"monospace" }}>{w.phonetic}</div>
-                    <div style={{ fontSize:9, color:"#ddd", marginTop:8, fontFamily:"sans-serif" }}>tap to flip · 点击翻转</div>
+                    <div style={{ fontSize:9, color:"#ddd", marginTop:8, fontFamily:FONT_ZH }}>tap to flip · 点击翻转</div>
                   </>
                 ) : (
                   <>
-                    <div style={{ fontSize:18, fontWeight:800, color:"#fff" }}>{w.zh}</div>
-                    <div style={{ fontSize:11, color:"#FECB8A", marginTop:6, fontFamily:"Georgia,serif" }}>{w.en}</div>
-                    <div style={{ fontSize:10, color:"#666", marginTop:6, fontFamily:"sans-serif", lineHeight:1.5 }}>{w.example_zh}</div>
+                    <div style={{ fontSize:18, fontWeight:600, color:"#fff" }}>{w.zh}</div>
+                    <div style={{ fontSize:11, color:"#FECB8A", marginTop:6, fontFamily:FONT_EN }}>{w.en}</div>
+                    <div style={{ fontSize:10, color:"#666", marginTop:6, fontFamily:FONT_ZH, lineHeight:1.5 }}>{w.example_zh}</div>
                   </>
                 )}
               </div>
@@ -809,11 +850,11 @@ Return ONLY a valid JSON array, no markdown:
           </div>
           {words.length > 0 && (
             <div style={{ ...S.card, marginBottom:12 }}>
-              <div style={{ fontSize:12, fontWeight:700, color:"#FD9033", marginBottom:10, fontFamily:"sans-serif" }}>📚 Example Sentences 例句</div>
+              <div style={{ fontSize:12, fontWeight:700, color:"#FD9033", marginBottom:10, fontFamily:FONT_ZH }}>📚 Example Sentences 例句</div>
               {words.map((w,i) => (
                 <div key={i} style={{ padding:"8px 0", borderBottom:"1px solid #f5f5f5" }}>
-                  <div style={{ fontSize:12, color:"#333", fontFamily:"sans-serif", lineHeight:1.6 }}><span style={{ color:"#FD9033", fontWeight:700 }}>{w.en}:</span> {w.example_en}</div>
-                  <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif", marginTop:2 }}>{w.example_zh}</div>
+                  <div style={{ fontSize:12, color:"#333", fontFamily:FONT_ZH, lineHeight:1.6 }}><span style={{ color:"#FD9033", fontWeight:700 }}>{w.en}:</span> {w.example_en}</div>
+                  <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_ZH, marginTop:2 }}>{w.example_zh}</div>
                 </div>
               ))}
             </div>
@@ -822,10 +863,10 @@ Return ONLY a valid JSON array, no markdown:
       )}
 
       {phraseOfDay && (
-        <div style={{ background:"#1a1a2e", borderRadius:18, padding:"18px 20px", color:"#fff" }}>
-          <div style={{ fontSize:10, fontWeight:700, letterSpacing:1, color:"#FECB8A", marginBottom:8, fontFamily:"sans-serif" }}>💬 PHRASE OF THE DAY 今日金句</div>
-          <div style={{ fontSize:15, fontWeight:800, fontFamily:"Georgia,serif", lineHeight:1.6 }}>"{phraseOfDay.en}"</div>
-          <div style={{ fontSize:12, color:"#c5cae9", marginTop:6, fontFamily:"sans-serif" }}>{phraseOfDay.zh}</div>
+        <div style={{ background:"#000000", borderRadius:18, padding:"18px 20px", color:"#fff" }}>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:1, color:"#FECB8A", marginBottom:8, fontFamily:FONT_ZH }}>💬 PHRASE OF THE DAY 今日金句</div>
+          <div style={{ fontSize:15, fontWeight:600, fontFamily:FONT_EN, lineHeight:1.6 }}>"{phraseOfDay.en}"</div>
+          <div style={{ fontSize:12, color:"#c5cae9", marginTop:6, fontFamily:FONT_ZH }}>{phraseOfDay.zh}</div>
           {phraseOfDay.author && <div style={{ fontSize:10, color:"#F4A84A", marginTop:6 }}>— {phraseOfDay.author}</div>}
         </div>
       )}
@@ -858,7 +899,7 @@ function ShareTab() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     canvas.width = 800; canvas.height = 800;
-    ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0,0,800,800);
+    ctx.fillStyle = "#000000"; ctx.fillRect(0,0,800,800);
     ctx.fillStyle = "#FD9033"; ctx.fillRect(0,0,12,800);
     ctx.fillStyle = "#F4A84A"; ctx.font = "bold 20px sans-serif"; ctx.fillText("LiftLingo · @赵赵是家宝", 56,96);
     ctx.fillStyle = "#fff"; ctx.font = "bold 54px Georgia"; ctx.fillText("陪你进入力量区", 56,164);
@@ -882,31 +923,31 @@ function ShareTab() {
   return (
     <div>
       <div style={{ ...S.card, marginBottom:16 }}>
-        <div style={{ fontSize:15, fontWeight:800, fontFamily:"Georgia,serif", color:"#1a1a2e", marginBottom:12 }}>
+        <div style={{ fontSize:15, fontWeight:600, fontFamily:FONT_EN, color:"#000000", marginBottom:12 }}>
           🎬 本周抖音计划 Weekly Douyin Plan
         </div>
         {DOUYIN_SCHEDULE.map((item,i) => (
           <div key={i} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f5f5f5" }}>
             <span style={{ fontSize:20, width:28 }}>{item.emoji}</span>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:13, color:"#333", fontFamily:"sans-serif" }}>{item.title}</div>
-              <div style={{ fontSize:11, color:"#aaa", fontFamily:"sans-serif" }}>{item.day} {item.zh}</div>
+              <div style={{ fontSize:13, color:"#333", fontFamily:FONT_ZH }}>{item.title}</div>
+              <div style={{ fontSize:11, color:"#aaa", fontFamily:FONT_ZH }}>{item.day} {item.zh}</div>
             </div>
-            <span style={{ background: item.status==="recorded"?"#E6F4F4":item.status==="planned"?"#e3f2fd":"#fff9e6", color:item.status==="recorded"?"#388e3c":item.status==="planned"?"#1565c0":"#f57f17", borderRadius:20, padding:"3px 10px", fontSize:10, fontWeight:700, fontFamily:"sans-serif", whiteSpace:"nowrap" }}>
+            <span style={{ background: item.status==="recorded"?"#E6F4F4":item.status==="planned"?"#e3f2fd":"#fff9e6", color:item.status==="recorded"?"#388e3c":item.status==="planned"?"#1565c0":"#f57f17", borderRadius:20, padding:"3px 10px", fontSize:10, fontWeight:700, fontFamily:FONT_ZH, whiteSpace:"nowrap" }}>
               {item.status==="recorded"?"已录制":item.status==="planned"?"计划中":"构思中"}
             </span>
           </div>
         ))}
-        <a href="https://www.douyin.com" target="_blank" rel="noopener noreferrer" style={{ display:"block", marginTop:12, textAlign:"center", padding:"10px", borderRadius:12, background:"#1a1a2e", color:"#fff", fontSize:13, textDecoration:"none", fontFamily:"sans-serif" }}>
+        <a href="https://www.douyin.com" target="_blank" rel="noopener noreferrer" style={{ display:"block", marginTop:12, textAlign:"center", padding:"10px", borderRadius:12, background:"#000000", color:"#fff", fontSize:13, textDecoration:"none", fontFamily:FONT_ZH }}>
           🎵 打开抖音发布 Open Douyin ↗
         </a>
       </div>
 
       <div style={{ ...S.card }}>
-        <div style={{ fontSize:15, fontWeight:800, fontFamily:"Georgia,serif", color:"#1a1a2e", marginBottom:4 }}>
+        <div style={{ fontSize:15, fontWeight:600, fontFamily:FONT_EN, color:"#000000", marginBottom:4 }}>
           📸 打卡截图 Checkin Card
         </div>
-        <div style={{ fontSize:12, color:"#888", marginBottom:14, fontFamily:"sans-serif" }}>今天完成了哪些？</div>
+        <div style={{ fontSize:12, color:"#888", marginBottom:14, fontFamily:FONT_ZH }}>今天完成了哪些？</div>
         {[["workout","🏋️ 完成训练 Workout done"],["diet","🥗 饮食记录 Diet logged"],["vocab","📖 词汇学习 Vocab studied"]].map(([k,label]) => (
           <div key={k} onClick={() => setCheckin(p=>({...p,[k]:!p[k]}))} style={{
             display:"flex", alignItems:"center", gap:12, padding:"12px 14px", borderRadius:12, marginBottom:8, cursor:"pointer",
@@ -915,25 +956,25 @@ function ShareTab() {
             transition:"all 0.2s",
           }}>
             <span style={{ fontSize:20 }}>{checkin[k]?"✅":"⬜"}</span>
-            <span style={{ fontSize:14, color: checkin[k] ? "#388e3c" : "#666", fontFamily:"sans-serif", fontWeight: checkin[k] ? 700 : 400 }}>{label}</span>
+            <span style={{ fontSize:14, color: checkin[k] ? "#388e3c" : "#666", fontFamily:FONT_ZH, fontWeight: checkin[k] ? 700 : 400 }}>{label}</span>
           </div>
         ))}
 
-        <div style={{ background:"#1a1a2e", borderRadius:16, padding:"20px", marginTop:14, color:"#fff", position:"relative", overflow:"hidden" }}>
+        <div style={{ background:"#000000", borderRadius:16, padding:"20px", marginTop:14, color:"#fff", position:"relative", overflow:"hidden" }}>
           <div style={{ position:"absolute", left:0, top:0, bottom:0, width:6, background:"#FD9033" }} />
-          <div style={{ fontSize:12, color:"#FECB8A", marginBottom:4, fontFamily:"sans-serif" }}>LiftLingo · @赵赵是家宝</div>
-          <div style={{ fontSize:22, fontWeight:800, fontFamily:"Georgia,serif" }}>陪你进入力量区</div>
-          <div style={{ fontSize:12, color:"#F4A84A", marginBottom:14, fontFamily:"sans-serif" }}>{dateStr}</div>
+          <div style={{ fontSize:12, color:"#FECB8A", marginBottom:4, fontFamily:FONT_ZH }}>LiftLingo · @赵赵是家宝</div>
+          <div style={{ fontSize:22, fontWeight:600, fontFamily:FONT_EN }}>陪你进入力量区</div>
+          <div style={{ fontSize:12, color:"#F4A84A", marginBottom:14, fontFamily:FONT_ZH }}>{dateStr}</div>
           {[["workout","💪 Workout 训练"],["diet","🥗 Diet 饮食"],["vocab","📖 Vocab 词汇"]].map(([k,label]) => (
-            <div key={k} style={{ background: checkin[k] ? "#388e3c" : "#2a2a40", borderRadius:10, padding:"8px 12px", fontSize:13, color: checkin[k] ? "#fff" : "#888", fontFamily:"sans-serif", marginBottom:6 }}>
+            <div key={k} style={{ background: checkin[k] ? "#388e3c" : "#2a2a40", borderRadius:10, padding:"8px 12px", fontSize:13, color: checkin[k] ? "#fff" : "#888", fontFamily:FONT_ZH, marginBottom:6 }}>
               {checkin[k]?"✅":"⬜"} {label}
             </div>
           ))}
-          <div style={{ fontSize:11, color:"#F4A84A", marginTop:12, fontFamily:"sans-serif" }}>@赵赵是家宝 · 抖音/小红书</div>
+          <div style={{ fontSize:11, color:"#F4A84A", marginTop:12, fontFamily:FONT_ZH }}>@赵赵是家宝 · 抖音/小红书</div>
         </div>
         <canvas ref={canvasRef} style={{ display:"none" }} />
         <div style={{ display:"flex", gap:10, marginTop:12 }}>
-          <button onClick={downloadCheckin} style={{ ...S.btn("#1a1a2e","#fff"), flex:1, textAlign:"center", padding:"12px 0" }}>📥 下载图片</button>
+          <button onClick={downloadCheckin} style={{ ...S.btn("#000000","#fff"), flex:1, textAlign:"center", padding:"12px 0" }}>📥 下载图片</button>
           <button onClick={copyCaption} style={{ ...S.btn(copied?"#E6F4F4":"#f0f0f7", copied?"#388e3c":"#FD9033"), flex:1, textAlign:"center", padding:"12px 0" }}>
             {copied ? "✅ Copied!" : "📋 复制文案"}
           </button>
@@ -952,43 +993,60 @@ export default function FitWithZhaoV3() {
   const handleStartWorkout = (exercises) => { setWorkoutExercises(exercises); setActiveTab("workout"); };
 
   return (
-    <div style={{ maxWidth:430, margin:"0 auto", minHeight:"100vh", background:"#f6f6fb", fontFamily:"sans-serif" }}>
-      <div style={{ background:"#1a1a2e", padding:"20px 20px 16px", color:"#fff" }}>
+    <div style={{ maxWidth:430, margin:"0 auto", minHeight:"100vh", background:"#ffffff", fontFamily:FONT_ZH }}>
+      <style>{`
+        @font-face {
+          font-family: "Alibaba PuHuiTi";
+          src: url("https://db.onlinewebfonts.com/t/70e85e06a6ea3fbd5e4030df68874fff.woff2") format("woff2");
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: "Alibaba PuHuiTi";
+          src: url("https://db.onlinewebfonts.com/t/1f59b4e0bdd0cda70692249b7b8e6f50.woff2") format("woff2");
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+      `}</style>
+      <div style={{ background:"#ffffff", padding:"14px 14px 16px", color:"#000000", borderBottom:"1px solid #f0f0f0" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
           <div>
-            <div style={{ fontSize:10, letterSpacing:2, color:"#F4A84A", fontWeight:700, textTransform:"uppercase" }}>Walk into the weight room.</div>
-            <div style={{ fontSize:26, fontWeight:900, fontFamily:"Georgia,serif", marginTop:3, lineHeight:1.1 }}>LiftLingo</div>
-            <div style={{ fontSize:12, color:"#FECB8A", marginTop:2 }}>陪你进入力量区</div>
+            <div style={{ fontSize:10, letterSpacing:2, color:"#999", fontWeight:600, textTransform:"uppercase" }}>Walk into the weight room.</div>
+            <div style={{ fontSize:26, fontWeight:700, fontFamily:FONT_EN, marginTop:3, lineHeight:1.1 }}>LiftLingo</div>
+            <div style={{ fontSize:12, color:"#999", marginTop:2 }}>陪你进入力量区</div>
           </div>
           <div style={{ textAlign:"right" }}>
-            <div style={{ fontSize:11, color:"#FECB8A" }}>Today · 今天</div>
-            <div style={{ fontSize:13, fontWeight:700, color:"#fff", marginTop:2 }}>{todayPlan.emoji} {todayPlan.label}</div>
+            <div style={{ fontSize:11, color:"#999" }}>Today · 今天</div>
+            <div style={{ fontSize:13, fontWeight:600, color:"#000000", marginTop:2 }}>{todayPlan.emoji} {todayPlan.label}</div>
             <div style={{ display:"flex", gap:3, marginTop:6, justifyContent:"flex-end" }}>
               {["M","T","W","T","F","S","S"].map((d,i) => (
-                <div key={i} style={{ width:22, height:22, borderRadius:"50%", background: i<5?"#FD9033":"rgba(255,255,255,0.12)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:8, color:"#fff", fontWeight:700 }}>{d}</div>
+                <div key={i} style={{ width:22, height:22, borderRadius:"50%", background: i<5?"#000000":"#f0f0f0", display:"flex", alignItems:"center", justifyContent:"center", fontSize:8, color: i<5?"#fff":"#bbb", fontWeight:600 }}>{d}</div>
               ))}
             </div>
           </div>
         </div>
-        <div style={{ marginTop:12, background:"rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 14px", display:"flex", alignItems:"center", gap:10 }}>
+        <div style={{ marginTop:12, background:"#ffffff", borderRadius:12, padding:"10px 14px", display:"flex", alignItems:"center", gap:10 }}>
           <span style={{ fontSize:22 }}>🔥</span>
           <div>
-            <span style={{ fontSize:18, fontWeight:800, fontFamily:"Georgia,serif" }}>{streak} days streak</span>
-            <div style={{ fontSize:11, color:"#FECB8A" }}>连续打卡 · Keep going!</div>
+            <span style={{ fontSize:18, fontWeight:600, fontFamily:FONT_EN, color:"#000000" }}>{streak} days streak</span>
+            <div style={{ fontSize:11, color:"#999" }}>连续打卡 · Keep going!</div>
           </div>
         </div>
       </div>
 
-      <div style={{ display:"flex", background:"#fff", padding:"6px 10px", gap:2, boxShadow:"0 2px 10px rgba(0,0,0,0.05)" }}>
+      <div style={{ display:"flex", margin:"10px 14px 0", gap:2 }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-            flex:1, padding:"7px 2px", border:"none", borderRadius:10,
-            background: activeTab===t.id ? "#1a1a2e" : "transparent",
-            color: activeTab===t.id ? "#fff" : "#999",
-            cursor:"pointer", transition:"all 0.2s", fontFamily:"sans-serif",
+            flex:1, padding:"7px 2px", border:"none", borderRadius:14,
+            background: activeTab===t.id ? "radial-gradient(circle at 32% 28%, #E0D6FF 0%, #B7A2FF 75%)" : "transparent",
+            boxShadow: activeTab===t.id ? "inset -2px -3px 5px rgba(255,255,255,0.6), inset 2px 4px 7px rgba(0,0,0,0.10), 0 3px 8px rgba(183,162,255,0.35)" : "none",
+            color: activeTab===t.id ? "#000000" : "#999",
+            cursor:"pointer", transition:"all 0.2s", fontFamily:FONT_ZH,
           }}>
             <div style={{ fontSize:17 }}>{t.icon}</div>
-            <div style={{ fontSize:9, marginTop:1, fontWeight: activeTab===t.id ? 700 : 400 }}>{t.en}</div>
+            <div style={{ fontSize:9, marginTop:1, fontWeight: activeTab===t.id ? 600 : 400 }}>{t.en}</div>
             <div style={{ fontSize:8, opacity:0.7 }}>{t.zh}</div>
           </button>
         ))}
@@ -1002,7 +1060,7 @@ export default function FitWithZhaoV3() {
         {activeTab==="share" && <ShareTab />}
       </div>
 
-      <div style={{ textAlign:"center", padding:"8px 0 24px", fontSize:10, color:"#ccc", fontFamily:"sans-serif" }}>
+      <div style={{ textAlign:"center", padding:"8px 0 24px", fontSize:10, color:"#ccc", fontFamily:FONT_ZH }}>
         @赵赵是家宝 · LiftLingo ✨
       </div>
     </div>
