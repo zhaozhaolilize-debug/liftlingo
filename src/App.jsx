@@ -308,7 +308,6 @@ function PlanTab({ onStartWorkout }) {
               cursor:"pointer", fontFamily:FONT_ZH, transition:"all 0.2s",
               position:"relative",
             }}>
-              {i===todayIdx && <span style={{ position:"absolute", top:6, left:"50%", transform:"translateX(-50%)", width:5, height:5, borderRadius:"50%", background: i===sel?"#fff":"#000", display:"block" }} />}
               <div style={{ fontSize:12, fontWeight:600 }}>{d}</div>
               <div style={{ fontSize:10, marginTop:2, opacity:0.8 }}>{DAYS_ZH[i]}</div>
               <div style={{ fontSize:12, marginTop:1 }}>{t.emoji}</div>
