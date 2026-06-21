@@ -290,6 +290,21 @@ function PlanTab({ onStartWorkout }) {
   };
   const exercises = getExercises(currentType);
 
+  const [checkedMap, setCheckedMap] = useState(() => {
+    try { const s = localStorage.getItem("liftlingo_checked"); if (s) return JSON.parse(s); } catch {}
+    return {};
+  });
+  const [warnEmpty, setWarnEmpty] = useState(false);
+
+  const checkedIds = checkedMap[currentType] ?? exercises.slice(0, 5).map(e => e.id);
+  const toggleChecked = (id) => {
+    const next = { ...checkedMap, [currentType]: checkedIds.includes(id) ? checkedIds.filter(x => x !== id) : [...checkedIds, id] };
+    setCheckedMap(next);
+    setWarnEmpty(false);
+    try { localStorage.setItem("liftlingo_checked", JSON.stringify(next)); } catch {}
+  };
+  const selectedExercises = exercises.filter(ex => checkedIds.includes(ex.id));
+
   const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const DAYS_ZH = ["周一","周二","周三","周四","周五","周六","周日"];
 
@@ -353,7 +368,7 @@ function PlanTab({ onStartWorkout }) {
               </div>
               {exercises.length > 0 && (
                 <div style={{ fontSize:11, color:"#bbb", marginTop:6, fontFamily:FONT_ZH }}>
-                  {exercises.length} 个动作 · 共 {exercises.reduce((s,e)=>s+e.sets,0)} 组
+                  {selectedExercises.length} 个动作 · 共 {selectedExercises.reduce((s,e)=>s+e.sets,0)} 组
                 </div>
               )}
             </div>
@@ -362,9 +377,12 @@ function PlanTab({ onStartWorkout }) {
                 ✏️ 换训练
               </button>
               {exercises.length > 0 && (
-                <button onClick={() => onStartWorkout(exercises)} style={{ ...S.btn("#000000","#fff"), fontSize:12 }}>
+                <button onClick={() => { if (selectedExercises.length === 0) { setWarnEmpty(true); return; } onStartWorkout(selectedExercises); }} style={{ ...S.btn(selectedExercises.length === 0 ? "#f0f0f0" : "#000000", selectedExercises.length === 0 ? "#bbb" : "#fff"), fontSize:12 }}>
                   开始 ▶
                 </button>
+              )}
+              {warnEmpty && selectedExercises.length === 0 && (
+                <div style={{ fontSize:10, color:"#e53935", fontFamily:FONT_ZH }}>请至少选一个动作</div>
               )}
             </div>
           </div>
@@ -381,8 +399,18 @@ function PlanTab({ onStartWorkout }) {
             </div>
           ) : (
             <>
-              {exercises.map(ex => (
+              {exercises.map(ex => {
+                const checked = checkedIds.includes(ex.id);
+                return (
                 <div key={ex.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f5f5f5" }}>
+                  <div onClick={() => toggleChecked(ex.id)} style={{
+                    width:22, height:22, minWidth:22, borderRadius:"50%", cursor:"pointer",
+                    border: checked ? "none" : "1.5px solid #ccc",
+                    background: checked ? "#000000" : "#fff",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                  }}>
+                    {checked && <span style={{ color:"#fff", fontSize:12, fontWeight:700 }}>✓</span>}
+                  </div>
                   <EmojiBadge emoji={ex.emoji} id={ex.id} size={42} />
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:600, fontSize:14, color:"#000000", fontFamily:FONT_EN }}>{ex.en}</div>
@@ -396,7 +424,7 @@ function PlanTab({ onStartWorkout }) {
                     <div style={{ fontSize:10, color:"#ddd" }}>{ex.rest}s 休息</div>
                   </div>
                 </div>
-              ))}
+              );})}
               <div style={{ marginTop:12, padding:"10px 14px", background:"#f8f8fc", borderRadius:12, display:"flex", alignItems:"center", gap:10 }}>
                 <span style={{ fontSize:16 }}>💡</span>
                 <div style={{ fontSize:11, color:"#888", fontFamily:FONT_ZH }}>
